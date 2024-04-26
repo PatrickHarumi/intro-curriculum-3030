@@ -1,25 +1,21 @@
 'use strict';
 const pug = require('pug');
-const test = require('node:test');
 const assert = require('node:assert');
 
-test('チャットメッセージに含まれる HTML タグがエスケープされる', () => {
-  const html = pug.renderFile(
-    './views/posts.pug',
+// pug のテンプレートにおける XSS 脆弱性のテスト
+const html = pug.renderFile('./views/posts.pug', {
+  posts: [
     {
-      posts: [
-        {
-          id: 1,
-          content: '<script>alert("XSS!");</script>',
-          postedBy: 'test_user',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
-      user: 'test_user',
-    },
-  );
-
-  // メッセージの <script> タグがエスケープされていることをチェック
-  assert(html.includes('&lt;script&gt;alert(&quot;XSS!&quot;);&lt;/script&gt;'));
+      id: 1,
+      content: "<script>alert('test');</script>",
+      postedBy: 'guest1',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ],
+  user: 'guest1'
 });
+
+// スクリプトタグがエスケープされて含まれていることをチェック
+assert(html.includes("&lt;script&gt;alert('test');&lt;/script&gt;"));
+console.log('テストが正常に完了しました');
